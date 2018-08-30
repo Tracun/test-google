@@ -1,6 +1,7 @@
 import datetime
 import os
-
+import dicttoxml
+from dicttoxml import dicttoxml
 import requests
 from flask_restful import Resource, Api
 from flask import Flask, jsonify, render_template
@@ -20,6 +21,20 @@ def AllStocks():
         return response.content  # json.loads(response.content.JSONDecoder('utf-8'))
     else:
         return None
+
+@app.route('/xml')
+def AllStocksXML():
+    response = requests.get(API_URL_BASE)
+
+    try:
+        xml = dicttoxml.dicttoxml(response.content)
+    except Exception as e:
+        return json.loads(e)
+
+    if response.status_code == 200:
+        return xml
+    else:
+        return xml
 
 @app.route('/finance/api/v1/stocks/<string:ticker>')
 def Ticker(ticker):
@@ -42,6 +57,9 @@ class NewTicker(Resource):
 
 @app.route('/')
 @app.route('/home')
+@app.route('/finance')
+@app.route('/finance/api')
+@app.route('/finance/api/v1')
 def index():
     return render_template(
         'index.html',
@@ -58,5 +76,5 @@ if __name__ == '__main__':
     #app.run(debug=True)
     app.run(host='0.0.0.0', port=5000)
 
-############ Study this case ##########################################
+################# Study this case ##########################################
 #REF: https://medium.com/python-pandemonium/build-simple-restful-api-with-python-and-flask-part-2-724ebf04d12 ###############
